@@ -1,0 +1,45 @@
+---
+title: "home-credit-default-risk"
+author: "Abhi Devathi"
+date: "6/13/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+library(tidyverse)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r data input}
+train <- read_csv("./input/application_train.csv")
+test <- read_csv("./input/application_test.csv")
+```
+
+## Preprocessing
+
+Here I want to see which columns are characters so I can process them into numerics using either nominal indexing, dummy variable selection or feature hashing (which is the most fun). We can also get rid of variables that do not have much variation, as they might not have predictive ability. 
+
+```{r looking}
+# str(train)
+# chrs <- sapply(train, is.character)
+names(train[, sapply(train, is.character)])
+train$FLAG_OWN_CAR <- ifelse(train$FLAG_OWN_CAR == "Y", 1, ifelse(train$FLAG_OWN_CAR == "N", 0, NA))
+train$FLAG_OWN_REALTY <- ifelse(train$FLAG_OWN_REALTY == "Y", 1, ifelse(train$FLAG_OWN_REALTY == "N", 0, NA))
+train <- train %>% mutate_if(is.character,as.factor) 
+
+```
+
+# Plotting
+
+```{r plotting}
+train %>% select(NAME_FAMILY_STATUS, CNT_CHILDREN) %>% group_by(NAME_FAMILY_STATUS) %>% 
+  summarise(meanChildren = mean(CNT_CHILDREN)) %>%
+  ggplot(aes(x = NAME_FAMILY_STATUS, y = meanChildren)) + geom_bar(stat = "identity")
+```
+
